@@ -4,59 +4,100 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="apple-touch-icon" href="https://img.icons8.com/color/180/008080/mountain.png">
-    <title>知己 - 留言盲盒</title>
+    <title>知己 - 雅致版</title>
     <style>
-        body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #004d4d; font-family: "STKaiti", serif; color: #333; }
-        .container { text-align: center; padding: 40px 20px; background: rgba(255, 255, 255, 0.9); border-radius: 30px; width: 85%; max-width: 350px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
-        #quote-display { font-size: 1.4rem; line-height: 1.6; margin: 30px 0; min-height: 80px; }
-        button { padding: 12px 40px; font-size: 1.1rem; cursor: pointer; background: #008080; color: white; border: none; border-radius: 50px; margin-top: 10px; }
-        .admin-btn { position: fixed; bottom: 20px; right: 20px; width: 40px; height: 40px; background: rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; color: white; border: none; }
-        .input-area { display: none; margin-top: 20px; }
-        textarea { width: 100%; border-radius: 10px; border: 1px solid #ccc; padding: 10px; font-size: 1rem; margin-bottom: 10px; }
+        body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #003153; font-family: "STKaiti", serif; overflow: hidden; transition: 1s; }
+        .container { text-align: center; padding: 35px 25px; background: rgba(255, 255, 255, 0.92); border-radius: 30px; width: 85%; max-width: 350px; box-shadow: 0 15px 40px rgba(0,0,0,0.3); position: relative; z-index: 10; }
+        #welcome-msg { font-size: 0.9rem; color: #666; margin-bottom: 10px; }
+        #quote-display { font-size: 1.4rem; line-height: 1.6; margin: 25px 0; min-height: 100px; color: #004d4d; display: flex; align-items: center; justify-content: center; }
+        button { padding: 12px 45px; font-size: 1.1rem; cursor: pointer; background: #008080; color: white; border: none; border-radius: 50px; box-shadow: 0 5px 15px rgba(0,128,128,0.3); }
+        .admin-panel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 320px; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 0 100px rgba(0,0,0,0.5); z-index: 100; max-height: 80vh; overflow-y: auto; }
+        textarea { width: 100%; height: 80px; border-radius: 10px; padding: 10px; box-sizing: border-box; margin-bottom: 10px; border: 1px solid #ddd; }
+        .msg-list { text-align: left; font-size: 0.9rem; margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; }
+        .msg-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #eee; }
+        .del-btn { color: #ff4d4d; font-size: 0.8rem; cursor: pointer; border: 1px solid #ff4d4d; padding: 2px 8px; border-radius: 5px; }
+        .close-admin { display: block; margin: 15px auto 0; background: #eee; color: #333; padding: 8px 20px; font-size: 0.9rem; }
+        .gear-btn { position: fixed; bottom: 20px; right: 20px; width: 45px; height: 45px; background: rgba(255,255,255,0.2); border-radius: 50%; border: none; font-size: 20px; color: white; backdrop-filter: blur(5px); }
     </style>
 </head>
 <body>
     <div class="container">
+        <div id="welcome-msg">正在加载山水意境...</div>
         <div id="quote-display">开启您的专属盲盒</div>
         <button onclick="openBox()">开启盲盒</button>
-        
-        <div id="input-area" class="input-area">
-            <textarea id="new-msg" placeholder="在这里写下想对家人说的话..."></textarea>
-            <button onclick="saveMsg()" style="background: #2c3e50;">存入盲盒</button>
-        </div>
     </div>
 
-    <button class="admin-btn" onclick="toggleInput()">✍️</button>
+    <button class="gear-btn" onclick="toggleAdmin()">✍️</button>
+
+    <div id="admin-panel" class="admin-panel">
+        <h3 style="margin-top:0">留言管理</h3>
+        <textarea id="new-msg" placeholder="写下一段心里话..."></textarea>
+        <button onclick="saveMsg()" style="width:100%">存入盲盒池</button>
+        <div class="msg-list" id="msg-list"></div>
+        <button class="close-admin" onclick="toggleAdmin()">关闭</button>
+    </div>
 
     <script>
-        // 默认的一些话
         let messages = JSON.parse(localStorage.getItem('myMessages')) || [
-            "登虞山望远，心旷神怡。",
-            "今日尚湖边漫步，想到了你。",
-            "记得多喝温水，照顾好自己。"
+            "登虞山望远，万物皆在心中。",
+            "尚湖之水，清冽如君子之交。",
+            "且听风吟，静待花开。"
         ];
+
+        function init() {
+            const hour = new Date().getHours();
+            let greet = "";
+            if(hour < 9) greet = "清晨好，老板。今日虞山有薄雾。";
+            else if(hour < 18) greet = "午后好，老板。愿您事事顺心。";
+            else greet = "向晚好，老板。愿明月伴您入梦。";
+            document.getElementById('welcome-msg').innerText = greet;
+            renderList();
+        }
 
         function openBox() {
             const display = document.getElementById('quote-display');
-            const randomIndex = Math.floor(Math.random() * messages.length);
-            display.innerText = messages[randomIndex];
+            const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+            display.innerText = randomMsg;
         }
 
-        function toggleInput() {
-            const area = document.getElementById('input-area');
-            area.style.display = area.style.display === 'block' ? 'none' : 'block';
+        function toggleAdmin() {
+            const panel = document.getElementById('admin-panel');
+            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
         }
 
         function saveMsg() {
             const input = document.getElementById('new-msg');
-            if (input.value.trim() !== "") {
-                messages.push(input.value);
-                localStorage.setItem('myMessages', JSON.stringify(messages));
-                alert("已存入盲盒池！");
+            if (input.value.trim()) {
+                messages.push(input.value.trim());
+                updateStorage();
                 input.value = "";
-                toggleInput();
+                renderList();
             }
         }
+
+        function deleteMsg(index) {
+            if(confirm("确定要删除这条留言吗？")) {
+                messages.splice(index, 1);
+                updateStorage();
+                renderList();
+            }
+        }
+
+        function updateStorage() {
+            localStorage.setItem('myMessages', JSON.stringify(messages));
+        }
+
+        function renderList() {
+            const list = document.getElementById('msg-list');
+            list.innerHTML = messages.map((m, i) => `
+                <div class="msg-item">
+                    <span>${m.substring(0, 15)}...</span>
+                    <span class="del-btn" onclick="deleteMsg(${i})">删除</span>
+                </div>
+            `).join('');
+        }
+
+        init();
     </script>
 </body>
 </html>
