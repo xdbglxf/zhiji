@@ -3,101 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="apple-touch-icon" href="https://img.icons8.com/color/180/008080/mountain.png">
-    <title>知己 - 雅致版</title>
+    <title>知己 - 云端交互版</title>
     <style>
-        body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #003153; font-family: "STKaiti", serif; overflow: hidden; transition: 1s; }
-        .container { text-align: center; padding: 35px 25px; background: rgba(255, 255, 255, 0.92); border-radius: 30px; width: 85%; max-width: 350px; box-shadow: 0 15px 40px rgba(0,0,0,0.3); position: relative; z-index: 10; }
-        #welcome-msg { font-size: 0.9rem; color: #666; margin-bottom: 10px; }
-        #quote-display { font-size: 1.4rem; line-height: 1.6; margin: 25px 0; min-height: 100px; color: #004d4d; display: flex; align-items: center; justify-content: center; }
-        button { padding: 12px 45px; font-size: 1.1rem; cursor: pointer; background: #008080; color: white; border: none; border-radius: 50px; box-shadow: 0 5px 15px rgba(0,128,128,0.3); }
-        .admin-panel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 320px; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 0 100px rgba(0,0,0,0.5); z-index: 100; max-height: 80vh; overflow-y: auto; }
-        textarea { width: 100%; height: 80px; border-radius: 10px; padding: 10px; box-sizing: border-box; margin-bottom: 10px; border: 1px solid #ddd; }
-        .msg-list { text-align: left; font-size: 0.9rem; margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; }
-        .msg-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #eee; }
-        .del-btn { color: #ff4d4d; font-size: 0.8rem; cursor: pointer; border: 1px solid #ff4d4d; padding: 2px 8px; border-radius: 5px; }
-        .close-admin { display: block; margin: 15px auto 0; background: #eee; color: #333; padding: 8px 20px; font-size: 0.9rem; }
-        .gear-btn { position: fixed; bottom: 20px; right: 20px; width: 45px; height: 45px; background: rgba(255,255,255,0.2); border-radius: 50%; border: none; font-size: 20px; color: white; backdrop-filter: blur(5px); }
+        body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #002b2b; font-family: "STKaiti", serif; color: #004d4d; overflow: hidden; }
+        .bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1500&q=80'); background-size: cover; opacity: 0.4; z-index: -1; animation: breathe 20s infinite alternate; }
+        @keyframes breathe { from { transform: scale(1); } to { transform: scale(1.05); } }
+        .card { background: rgba(255, 255, 255, 0.9); padding: 30px; border-radius: 25px; width: 85%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(5px); }
+        #display { font-size: 1.3rem; line-height: 1.6; margin: 20px 0; min-height: 100px; display: flex; align-items: center; justify-content: center; }
+        .btn { background: #008080; color: white; border: none; padding: 12px 30px; border-radius: 50px; font-size: 1rem; cursor: pointer; transition: 0.3s; width: 100%; margin-bottom: 10px; }
+        .btn:disabled { background: #ccc; }
+        .info { font-size: 0.8rem; color: #666; }
+        .admin-btn { position: fixed; bottom: 20px; right: 20px; opacity: 0.3; background: none; border: none; font-size: 20px; cursor: pointer; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 100; padding: 20px; box-sizing: border-box; overflow-y: auto; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div id="welcome-msg">正在加载山水意境...</div>
-        <div id="quote-display">开启您的专属盲盒</div>
-        <button onclick="openBox()">开启盲盒</button>
+    <div class="bg"></div>
+    <div class="card">
+        <div id="display">今日机缘，待您开启</div>
+        <button id="openBtn" class="btn" onclick="openBox()">开启盲盒</button>
+        <div class="info" id="countInfo">今日剩余开启次数: 3</div>
+        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #ddd;">
+        <button class="btn" style="background:#556b2f" onclick="showPost()">我也要投递</button>
     </div>
 
-    <button class="gear-btn" onclick="toggleAdmin()">✍️</button>
-
-    <div id="admin-panel" class="admin-panel">
-        <h3 style="margin-top:0">留言管理</h3>
-        <textarea id="new-msg" placeholder="写下一段心里话..."></textarea>
-        <button onclick="saveMsg()" style="width:100%">存入盲盒池</button>
-        <div class="msg-list" id="msg-list"></div>
-        <button class="close-admin" onclick="toggleAdmin()">关闭</button>
+    <div id="modal" class="modal">
+        <h3 id="modalTitle">投递心里话</h3>
+        <textarea id="inputText" style="width:100%; height:120px; border-radius:10px; padding:10px;"></textarea>
+        <button id="submitBtn" class="btn" style="margin-top:15px;" onclick="actionSubmit()">确认提交</button>
+        <div id="adminList"></div>
+        <button class="btn" style="background:#8b0000; margin-top:20px;" onclick="closeModal()">关闭</button>
     </div>
+
+    <button class="admin-btn" onclick="showAdmin()">🕯️</button>
 
     <script>
-        let messages = JSON.parse(localStorage.getItem('myMessages')) || [
-            "登虞山望远，万物皆在心中。",
-            "尚湖之水，清冽如君子之交。",
-            "且听风吟，静待花开。"
-        ];
+       // --- 核心配置（老板请在这里填入您的真实信息） ---
+const GITHUB_TOKEN = "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"; 
+const USER = "xdbglxf";  
+const REPO = "zhiji";    // 如果您的仓库名是别的，把 zhiji 换掉就行
+// ------------------------------------------
 
-        function init() {
-            const hour = new Date().getHours();
-            let greet = "";
-            if(hour < 9) greet = "清晨好，老板。今日虞山有薄雾。";
-            else if(hour < 18) greet = "午后好，老板。愿您事事顺心。";
-            else greet = "向晚好，老板。愿明月伴您入梦。";
-            document.getElementById('welcome-msg').innerText = greet;
-            renderList();
+        let userStats = JSON.parse(localStorage.getItem('zhiji_stats')) || { date: "", count: 0 };
+
+        // 检查每日次数
+        function checkDate() {
+            const today = new Date().toDateString();
+            if (userStats.date !== today) {
+                userStats = { date: today, count: 0 };
+                localStorage.setItem('zhiji_stats', JSON.stringify(userStats));
+            }
+            document.getElementById('countInfo').innerText = `今日剩余开启次数: ${3 - userStats.count}`;
+            if (userStats.count >= 3) document.getElementById('openBtn').disabled = true;
         }
 
-        function openBox() {
-            const display = document.getElementById('quote-display');
-            const randomMsg = messages[Math.floor(Math.random() * messages.length)];
-            display.innerText = randomMsg;
-        }
+        // 开启盲盒：从 GitHub Issues 获取已关闭（代表审核通过）的条目
+        async function openBox() {
+            if (userStats.count >= 3) return;
+            document.getElementById('display').innerText = "正在感应...";
+            
+            try {
+                // 我们获取状态为 'closed' 的 Issue，作为通过审核的盲盒
+                const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/issues?state=closed`, {
+                    headers: { Authorization: `token ${GITHUB_TOKEN}` }
+                });
+                const data = await res.json();
+                
+                if (data.length === 0) {
+                    document.getElementById('display').innerText = "池子里还没有通过审核的话，请稍后再来。";
+                    return;
+                }
 
-        function toggleAdmin() {
-            const panel = document.getElementById('admin-panel');
-            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-        }
+                const randomIssue = data[Math.floor(Math.random() * data.length)];
+                const text = randomIssue.title;
+                document.getElementById('display').innerText = text;
 
-        function saveMsg() {
-            const input = document.getElementById('new-msg');
-            if (input.value.trim()) {
-                messages.push(input.value.trim());
-                updateStorage();
-                input.value = "";
-                renderList();
+                // 计数
+                userStats.count++;
+                localStorage.setItem('zhiji_stats', JSON.stringify(userStats));
+                checkDate();
+
+                // 语音
+                const speech = new SpeechSynthesisUtterance(text);
+                speech.lang = 'zh-CN';
+                window.speechSynthesis.speak(speech);
+
+            } catch (e) {
+                alert("感应失败，请检查配置");
             }
         }
 
-        function deleteMsg(index) {
-            if(confirm("确定要删除这条留言吗？")) {
-                messages.splice(index, 1);
-                updateStorage();
-                renderList();
+        // 投稿：提交到 GitHub Issues
+        async function actionSubmit() {
+            const text = document.getElementById('inputText').value.trim();
+            if (!text) return;
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').innerText = "正在飞往云端...";
+
+            try {
+                await fetch(`https://api.github.com/repos/${USER}/${REPO}/issues`, {
+                    method: 'POST',
+                    headers: { Authorization: `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: text, body: "来自用户的匿名投递" })
+                });
+                alert("投递成功！待掌柜审核后即可入池。");
+                closeModal();
+            } catch (e) {
+                alert("投递失败");
             }
+            document.getElementById('submitBtn').disabled = false;
         }
 
-        function updateStorage() {
-            localStorage.setItem('myMessages', JSON.stringify(messages));
+        function showPost() {
+            document.getElementById('modalTitle').innerText = "投递心里话";
+            document.getElementById('adminList').style.display = 'none';
+            document.getElementById('inputText').style.display = 'block';
+            document.getElementById('submitBtn').style.display = 'block';
+            document.getElementById('modal').style.display = 'block';
         }
 
-        function renderList() {
-            const list = document.getElementById('msg-list');
-            list.innerHTML = messages.map((m, i) => `
-                <div class="msg-item">
-                    <span>${m.substring(0, 15)}...</span>
-                    <span class="del-btn" onclick="deleteMsg(${i})">删除</span>
+        async function showAdmin() {
+            const pw = prompt("请输入掌柜暗号:");
+            if(pw !== "123") return; // 这里的暗号您可以自己改
+
+            document.getElementById('modalTitle').innerText = "待审核列表";
+            document.getElementById('inputText').style.display = 'none';
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('adminList').style.display = 'block';
+            document.getElementById('modal').style.display = 'block';
+
+            const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/issues?state=open`, {
+                headers: { Authorization: `token ${GITHUB_TOKEN}` }
+            });
+            const data = await res.json();
+            document.getElementById('adminList').innerHTML = data.map(i => `
+                <div style="border-bottom:1px solid #eee; padding:10px; font-size:0.9rem;">
+                    <p>${i.title}</p>
+                    <button onclick="approve(${i.number})" style="color:green">通过</button>
                 </div>
-            `).join('');
+            `).join('') || "暂无待审核内容";
         }
 
-        init();
+        async function approve(num) {
+            // 通过审核即关闭该 Issue
+            await fetch(`https://api.github.com/repos/${USER}/${REPO}/issues/${num}`, {
+                method: 'PATCH',
+                headers: { Authorization: `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ state: 'closed' })
+            });
+            alert("审核通过！");
+            showAdmin();
+        }
+
+        function closeModal() { document.getElementById('modal').style.display = 'none'; }
+        checkDate();
     </script>
 </body>
 </html>
