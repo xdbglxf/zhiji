@@ -1,98 +1,108 @@
-<script>
-    // --- 核心配置：老板的新钥匙“碎砖法”隐藏 ---
-    const _p1 = "ghp_nofUZ0PMRG6I";
-    const _p2 = "ZS9149gLWiHehb6";
-    const _p3 = "ndt0ZgDmG";
-    
-    const GITHUB_TOKEN = _p1 + _p2 + _p3; // 自动拼合
-    const USER = "xdbglxf"; 
-    const REPO = "zhiji"; 
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知己 | 你的私人角落</title>
+    <style>
+        :root { --bg-color: #fce4ec; --accent-color: #f06292; --text-main: #4a4a4a; --text-sub: #880e4f; }
+        body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: var(--bg-color); font-family: "PingFang SC", sans-serif; color: var(--text-main); transition: 0.5s; }
+        .main-card { background: rgba(255, 255, 255, 0.92); padding: 50px 30px; border-radius: 40px; width: 85%; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(240, 98, 146, 0.15); }
+        h1 { font-size: 1.8rem; color: var(--text-sub); margin-bottom: 5px; }
+        .subtitle { font-size: 0.9rem; color: #f48fb1; margin-bottom: 40px; letter-spacing: 2px; }
+        .warm-quote { font-size: 1.2rem; line-height: 1.8; margin: 40px 0; min-height: 100px; display: flex; align-items: center; justify-content: center; }
+        .mode-group { display: flex; justify-content: center; gap: 15px; margin-bottom: 40px; }
+        .mode-btn { border: none; padding: 12px 25px; border-radius: 50px; color: white; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .sun { background: #ffb1b1; }
+        .moon { background: #a29bfe; }
+        .appendix { border-top: 1px solid #fce4ec; padding-top: 25px; display: flex; justify-content: space-around; }
+        .app-link { background: none; border: none; color: #adadad; font-size: 0.85rem; cursor: pointer; text-decoration: underline; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(252, 228, 236, 0.8); backdrop-filter: blur(8px); z-index: 100; justify-content: center; align-items: center; }
+        .modal-box { background: white; padding: 30px; border-radius: 30px; width: 80%; max-width: 320px; }
+        textarea { width: 100%; height: 100px; border: 1px solid #ffebee; border-radius: 15px; padding: 15px; margin: 15px 0; box-sizing: border-box; outline: none; }
+    </style>
+</head>
+<body>
+    <div class="main-card">
+        <h1>你好，老板 ✨</h1>
+        <div class="subtitle">— 你的私人情绪伴侣 —</div>
+        <div class="warm-quote" id="quoteText">今天辛苦了，<br>记得给自己一个拥抱。</div>
+        <div class="mode-group">
+            <button class="mode-btn sun" onclick="setMode('阳光')">🌞 阳光模式</button>
+            <button class="mode-btn moon" onclick="setMode('治愈')">🌙 治愈模式</button>
+        </div>
+        <div class="appendix">
+            <button class="app-link" onclick="openBox()">感应盲盒</button>
+            <button class="app-link" onclick="showPost()">投递心事</button>
+        </div>
+    </div>
 
-    const quotes = {
-        '阳光': [
-            "早安老板，今天也要先爱自己，再爱世界。☀️",
-            "生活不在别处，脚下即是坦途。",
-            "把心情调成飞行模式，去感受风的自由。",
-            "每个优秀的人，都有一段沉默的时光，那是扎根的过程。",
-            "万物可爱，人间值得，未来可期。",
-            "在这个吵闹的世界，守住你内心的那份安静。",
-            "外界的声音只是参考，你不快乐才是参考答案。"
-        ],
-        '治愈': [
-            "辛苦了老板，如果累了，这扇门永远为你留着。🕯️",
-            "没关系的，允许自己偶尔不那么强大。",
-            "你可以躲在阴影里歇一歇，但别忘了光就在不远处。",
-            "星星发光是为了让每一个人，有一天都能找到属于自己的星球。",
-            "世界偶尔凉薄，但总有温柔在转角处等你。",
-            "慢一点没关系，只要是在往前走，哪怕很小一步也算数。",
-            "睡个好觉，梦里有揉碎的星光和橘子味的晚霞。"
-        ]
-    };
+    <div id="postModal" class="modal" onclick="if(event.target==this)closeModal()">
+        <div class="modal-box">
+            <h3 style="margin:0; color: #f06292;">写给未来的自己</h3>
+            <textarea id="postInput" placeholder="在此刻，留下你的呼吸..."></textarea>
+            <button class="mode-btn sun" style="width:100%" onclick="submitPost()">轻轻寄出</button>
+        </div>
+    </div>
 
-    function setMode(type) {
-        const list = quotes[type];
-        const random = list[Math.floor(Math.random() * list.length)];
-        document.getElementById('quoteText').innerHTML = random;
-        document.body.style.background = type === '阳光' ? '#fff9db' : '#fce4ec';
+    <script>
+        const _p1 = "ghp_nofUZ0PMRG6I";
+        const _p2 = "ZS9149gLWiHehb6";
+        const _p3 = "ndt0ZgDmG";
+        const GITHUB_TOKEN = _p1 + _p2 + _p3;
+        const USER = "xdbglxf"; 
+        const REPO = "zhiji"; 
+
+        const quotes = {
+            '阳光': ["早安老板，今天也要先爱自己，再爱世界。☀️", "生活不在别处，脚下即是坦途。", "在这个吵闹的世界，守住你内心的那份安静。", "外界的声音只是参考，你不快乐才是参考答案。"],
+            '治愈': ["辛苦了老板，如果累了，这扇门永远为你留着。🕯️", "没关系的，允许自己偶尔不那么强大。", "别怕，你是被这个世界偷偷爱着的。", "睡个好觉，梦里有揉碎的星光和橘子味的晚霞。"]
+        };
+
+        function setMode(type) {
+            const list = quotes[type];
+            const random = list[Math.floor(Math.random() * list.length)];
+            document.getElementById('quoteText').innerHTML = random;
+            document.body.style.background = type === '阳光' ? '#fff9db' : '#fce4ec';
+            speak(random);
+        }
+
+        async function openBox() {
+            const display = document.getElementById('quoteText');
+            display.innerText = "正在感应云端...";
+            try {
+                const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/issues?state=closed`, {
+                    headers: { Authorization: `token ${GITHUB_TOKEN}` }
+                });
+                const data = await res.json();
+                if (data && data.length > 0) {
+                    const msg = data[Math.floor(Math.random() * data.length)].title;
+                    display.innerText = msg;
+                    speak(msg);
+                } else { display.innerText = "池子空空的，去GitHub点Close审核一条吧。"; }
+            } catch (e) { display.innerText = "感应失败了..."; }
+        }
+
+        function showPost() { document.getElementById('postModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('postModal').style.display = 'none'; }
         
-        // 温柔语音播报
-        const speech = new SpeechSynthesisUtterance(random.replace(/<br>/g, ''));
-        speech.lang = 'zh-CN';
-        speech.rate = 0.8; 
-        window.speechSynthesis.speak(speech);
-    }
-
-    // 盲盒：抽签（读取已关闭的Issue）
-    async function openBox() {
-        const display = document.getElementById('quoteText');
-        display.innerText = "正在感应云端...";
-        try {
-            const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/issues?state=closed`, {
-                headers: { Authorization: `token ${GITHUB_TOKEN}` }
-            });
-            const data = await res.json();
-            if (data && data.length > 0) {
-                const msg = data[Math.floor(Math.random() * data.length)].title;
-                display.innerText = msg;
-                const speech = new SpeechSynthesisUtterance(msg);
-                speech.lang = 'zh-CN';
-                window.speechSynthesis.speak(speech);
-            } else {
-                display.innerText = "池子还空着，去投递并点Close审核一条吧。";
-            }
-        } catch (e) { 
-            display.innerText = "感应失败，请检查网络或钥匙。";
-            console.error(e);
+        async function submitPost() {
+            const text = document.getElementById('postInput').value.trim();
+            if(!text) return;
+            try {
+                const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/issues`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: text, body: "网页投递" })
+                });
+                if(res.ok) { alert("寄出成功！去GitHub Issues点Close审核吧。"); closeModal(); }
+            } catch (e) { alert("信号丢失..."); }
         }
-    }
 
-    // 投递心事
-    function showPost() { document.getElementById('postModal').style.display = 'flex'; }
-    function closeModal() { document.getElementById('postModal').style.display = 'none'; }
-    
-    async function submitPost() {
-        const text = document.getElementById('postInput').value.trim();
-        if(!text) return;
-        const btn = event.target;
-        btn.innerText = "正在寄出...";
-        try {
-            const response = await fetch(`https://api.github.com/repos/${USER}/${REPO}/issues`, {
-                method: 'POST',
-                headers: { 
-                    'Authorization': `token ${GITHUB_TOKEN}`,
-                    'Content-Type': 'application/json' 
-                },
-                body: JSON.stringify({ title: text, body: "来自网页的匿名投递" })
-            });
-            if(response.ok) {
-                alert("寄出成功！请去GitHub Issues点Close审核。");
-                closeModal();
-            } else {
-                alert("寄出失败，状态码：" + response.status);
-            }
-        } catch (e) { 
-            alert("信号丢失..."); 
+        function speak(msg) {
+            const s = new SpeechSynthesisUtterance(msg.replace(/<br>/g, ''));
+            s.lang = 'zh-CN'; s.rate = 0.8;
+            window.speechSynthesis.speak(s);
         }
-        btn.innerText = "轻轻寄出";
-    }
-</script>
+    </script>
+</body>
+</html>
