@@ -3,45 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="apple-touch-icon" href="https://img.icons8.com/color/180/000000/mountain-range.png">
+    
+    <link rel="apple-touch-icon" href="https://img.icons8.com/ios-filled/180/008080/mountain.png">
+    
     <title>知己 - 黛青盲盒</title>
     <style>
         body {
             margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh;
-            /* 初始背景：深青色调的远山 */
             background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
             background-size: cover; font-family: "STKaiti", "KaiTi", serif; transition: background 1.5s ease;
         }
-        /* 黛青色半透明遮罩，增加高级感 */
         body::before { 
             content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            background: linear-gradient(135deg, rgba(0, 49, 83, 0.4), rgba(0, 128, 128, 0.2)); 
-            backdrop-filter: blur(6px); z-index: -1; 
+            background: rgba(0, 128, 128, 0.2); backdrop-filter: blur(8px); z-index: -1; 
         }
         .container { 
             text-align: center; padding: 40px 25px; 
-            background: rgba(255, 255, 255, 0.88); 
-            border-radius: 35px; box-shadow: 0 20px 60px rgba(0, 49, 83, 0.2); 
+            background: rgba(255, 255, 255, 0.85); 
+            border-radius: 35px; box-shadow: 0 20px 60px rgba(0, 128, 128, 0.2); 
             width: 85%; max-width: 350px; border: 1px solid rgba(255,255,255,1); 
         }
-        #type-tag { 
-            font-size: 0.85rem; color: #008080; margin-bottom: 20px; 
-            background: rgba(0, 128, 128, 0.1); display: inline-block; 
-            padding: 3px 15px; border-radius: 15px; font-weight: bold; 
-        }
-        #quote-display { 
-            font-size: 1.45rem; line-height: 1.7; margin-bottom: 35px; 
-            min-height: 100px; color: #003153; display: flex; 
-            align-items: center; justify-content: center; 
-        }
-        /* 核心按钮：深青色（石青） */
-        button { 
-            padding: 13px 45px; font-size: 1.1rem; cursor: pointer; 
-            background: #004d4d; color: #ffffff; border: none; 
-            border-radius: 50px; box-shadow: 0 10px 20px rgba(0, 77, 77, 0.3); 
-            transition: all 0.3s ease; 
-        }
-        button:active { transform: scale(0.92); background: #003333; }
+        #type-tag { font-size: 0.85rem; color: #008080; margin-bottom: 20px; background: rgba(0, 128, 128, 0.1); display: inline-block; padding: 3px 15px; border-radius: 15px; font-weight: bold; }
+        #quote-display { font-size: 1.45rem; line-height: 1.7; margin-bottom: 35px; min-height: 100px; color: #003333; display: flex; align-items: center; justify-content: center; }
+        button { padding: 13px 45px; font-size: 1.1rem; cursor: pointer; background: #008080; color: #ffffff; border: none; border-radius: 50px; box-shadow: 0 10px 20px rgba(0, 128, 128, 0.3); transition: 0.3s; }
         .fade-in { animation: fadeIn 1s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -49,25 +33,18 @@
 <body>
     <div class="container fade-in">
         <div id="type-tag">黛青锦囊</div>
-        <div id="quote-display">万物有灵，静水深流</div>
+        <div id="quote-display">心有山水，处处是归途</div>
         <button onclick="openBox()">开启盲盒</button>
     </div>
     <script>
         const boxContent = [
             {type: "🏮 宜", text: "登虞山望远。目之所及，皆是风景。"},
-            {type: "☁️ 忌", text: "忧虑明天。今日的阳光已经足够温暖。"},
             {type: "🍵 雅", text: "尚湖边品茗。半卷闲书，一盏清茶。"},
             {type: "✨ 运", text: "今日财运：上吉。或许会有意外的小惊喜。"},
             {type: "❤️ 暖", text: "家人平安。这是生活送你最厚重的礼物。"},
-            {type: "📜 诗", text: "且将新火试新茶，诗酒趁年华。"},
-            {type: "🌫️ 禅", text: "行到水穷处，坐看云起时。"}
+            {type: "📜 诗", text: "且将新火试新茶，诗酒趁年华。"}
         ];
-        // 筛选了三张不同氛围的深青色系背景
-        const bgImages = [
-            'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1350&q=80',
-            'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1350&q=80',
-            'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1350&q=80'
-        ];
+        const bgImages = ['https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1350&q=80','https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1350&q=80'];
         function openBox() {
             const display = document.getElementById('quote-display');
             const tag = document.getElementById('type-tag');
