@@ -38,12 +38,11 @@
     <button class="admin-btn" onclick="showAdmin()">🕯️</button>
 
     <script>
-       // --- 核心配置（老板请在这里填入您的真实信息） ---
-const GITHUB_TOKEN = "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"; 
-const USER = "xdbglxf";  
-const REPO = "zhiji";    // 如果您的仓库名是别的，把 zhiji 换掉就行
-// ------------------------------------------
-
+       // --- 核心配置（老板请填写这里） ---
+        const GITHUB_TOKEN = "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"; 
+        const USER = "xdbglxf"; 
+        const REPO = "zhiji";     
+        // ------------------------------
         let userStats = JSON.parse(localStorage.getItem('zhiji_stats')) || { date: "", count: 0 };
 
         // 检查每日次数
