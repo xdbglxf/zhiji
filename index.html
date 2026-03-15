@@ -9,8 +9,7 @@
         body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: "STKaiti", "KaiTi", serif; transition: 1s; overflow: hidden; }
         .main-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); padding: 40px; border-radius: 20px; width: 85%; max-width: 450px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.3); }
         h1 { font-size: 1.8rem; letter-spacing: 5px; margin: 0; color: #333; }
-        #tag { font-size: 0.9rem; margin-top: 10px; opacity: 0.7; }
-        .content-area { margin: 30px 0; min-height: 180px; display: flex; align-items: center; justify-content: center; line-height: 2; font-size: 1.15rem; color: #444; text-align: justify; }
+        .content-area { margin: 30px 0; min-height: 180px; display: flex; align-items: center; justify-content: center; line-height: 2; font-size: 1.15rem; color: #444; text-align: justify; white-space: pre-wrap; }
         .btn-group { display: flex; flex-direction: column; gap: 15px; }
         .action-btn { background: #57606f; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; letter-spacing: 2px; transition: 0.3s; font-size: 1rem; }
         .action-btn:hover { background: #2f3542; }
@@ -23,7 +22,7 @@
 <body>
     <div class="main-card">
         <h1 id="title">知 己</h1>
-        <div id="tag">寻常日子，清欢随心</div>
+        <div id="tag" style="font-size: 0.9rem; margin-top: 10px; opacity: 0.7;">寻常日子，清欢随心</div>
         <div class="content-area" id="quoteText">正在为您折叠时光中的温柔...</div>
         <div class="btn-group">
             <button class="action-btn" onclick="fetchQuote()">换一则心情</button>
@@ -41,22 +40,25 @@
     </div>
 
     <script>
+        // 配置信息
         const _p = ["ghp_nofUZ0PMRG6I", "ZS9149gLWiHehb6", "ndt0ZgDmG"];
         const GITHUB_TOKEN = _p.join("");
         const USER = "xdbglxf", REPO = "zhiji";
 
+        // 获取美文
         async function fetchQuote() {
             const display = document.getElementById('quoteText');
             const hour = new Date().getHours();
             const isNight = hour < 6 || hour >= 18;
             
-            document.body.style.background = isNight ? "var(--night-bg)" : "var(--day-bg)";
+            document.body.style.background = isNight ? "#2c3e50" : "#f7f8f3";
             document.querySelector('.main-card').style.background = isNight ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.85)";
-            display.style.color = isNight ? "var(--night-text)" : "var(--day-text)";
+            display.style.color = isNight ? "#f1f2f6" : "#2f3542";
             document.getElementById('title').style.color = isNight ? "#fff" : "#333";
 
             try {
-                const res = await fetch('./quotes.json?t=' + new Date().getTime());
+                // 直接请求同级目录下的文件
+                const res = await fetch('quotes.json?v=' + Date.now());
                 if (!res.ok) throw new Error();
                 const data = await res.json();
                 const pool = isNight ? data.night : data.morning;
@@ -64,31 +66,11 @@
                 display.innerText = msg;
                 speak(msg);
             } catch (e) { 
-                display.innerText = "清欢未到，且饮杯茶。（请检查 quotes.json 是否在根目录）"; 
+                display.innerText = "清欢未到，且饮杯茶。\n(请确认 quotes.json 位于根目录)"; 
             }
         }
 
-        async function openBox() {
-            const display = document.getElementById('quoteText');
-            display.innerText = "正在感应盲盒...";
-            try {
-                const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/issues?state=all`, {
-                    headers: { Authorization: `token ${GITHUB_TOKEN}` }
-                });
-                const data = await res.json();
-                if(data.length > 0) {
-                    const msg = data[Math.floor(Math.random() * data.length)].title;
-                    display.innerText = "【盲盒感应】\n" + msg;
-                    speak(msg);
-                } else {
-                    display.innerText = "池子空空的，去投递第一份心事吧。";
-                }
-            } catch (e) { display.innerText = "感应失败了..."; }
-        }
-
-        function showPost() { document.getElementById('postModal').style.display = 'flex'; }
-        function closeModal() { document.getElementById('postModal').style.display = 'none'; }
-        
+        // 盲盒投递
         async function submitPost() {
             const text = document.getElementById('postInput').value.trim();
             if(!text) return;
@@ -106,6 +88,25 @@
             } catch (e) { alert("信号丢失..."); }
         }
 
+        // 盲盒读取
+        async function openBox() {
+            const display = document.getElementById('quoteText');
+            display.innerText = "正在感应盲盒...";
+            try {
+                const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/issues?state=all`, {
+                    headers: { Authorization: `token ${GITHUB_TOKEN}` }
+                });
+                const data = await res.json();
+                if(data.length > 0) {
+                    const msg = data[Math.floor(Math.random() * data.length)].title;
+                    display.innerText = "【盲盒感应】\n" + msg;
+                    speak(msg);
+                }
+            } catch (e) { display.innerText = "感应失败了..."; }
+        }
+
+        function showPost() { document.getElementById('postModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('postModal').style.display = 'none'; }
         function speak(msg) {
             window.speechSynthesis.cancel();
             const cleanMsg = msg.includes('】') ? msg.split('】')[1] : msg;
