@@ -12,9 +12,12 @@
         #tag { font-size: 0.9rem; margin-top: 10px; opacity: 0.7; }
         .content-area { margin: 30px 0; min-height: 180px; display: flex; align-items: center; justify-content: center; line-height: 2; font-size: 1.15rem; color: #444; text-align: justify; }
         .btn-group { display: flex; flex-direction: column; gap: 15px; }
-        .action-btn { background: #57606f; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; letter-spacing: 2px; transition: 0.3s; }
+        .action-btn { background: #57606f; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; letter-spacing: 2px; transition: 0.3s; font-size: 1rem; }
         .action-btn:hover { background: #2f3542; }
-        .footer { margin-top: 25px; font-size: 0.8rem; opacity: 0.5; cursor: pointer; }
+        .footer { margin-top: 25px; font-size: 0.8rem; opacity: 0.5; cursor: pointer; text-decoration: underline; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); z-index: 100; justify-content: center; align-items: center; }
+        .modal-box { background: white; padding: 30px; border-radius: 20px; width: 80%; max-width: 320px; }
+        textarea { width: 100%; height: 100px; border: 1px solid #ddd; border-radius: 10px; padding: 10px; margin: 15px 0; box-sizing: border-box; outline: none; font-family: inherit; }
     </style>
 </head>
 <body>
@@ -29,6 +32,14 @@
         <div class="footer" onclick="showPost()">— 投递心事 —</div>
     </div>
 
+    <div id="postModal" class="modal" onclick="if(event.target==this)closeModal()">
+        <div class="modal-box">
+            <h3 style="margin:0; color: #333;">写给未来的自己</h3>
+            <textarea id="postInput" placeholder="在此刻，留下你的呼吸..."></textarea>
+            <button class="action-btn" style="width:100%" onclick="submitPost()">轻轻寄出</button>
+        </div>
+    </div>
+
     <script>
         const _p = ["ghp_nofUZ0PMRG6I", "ZS9149gLWiHehb6", "ndt0ZgDmG"];
         const GITHUB_TOKEN = _p.join("");
@@ -39,24 +50,27 @@
             const hour = new Date().getHours();
             const isNight = hour < 6 || hour >= 18;
             
-            // 切换主题
             document.body.style.background = isNight ? "var(--night-bg)" : "var(--day-bg)";
             document.querySelector('.main-card').style.background = isNight ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.85)";
             display.style.color = isNight ? "var(--night-text)" : "var(--day-text)";
             document.getElementById('title').style.color = isNight ? "#fff" : "#333";
 
             try {
-                const res = await fetch(`https://raw.githubusercontent.com/${USER}/${REPO}/main/quotes.json?v=${Date.now()}`);
+                const res = await fetch('./quotes.json?t=' + new Date().getTime());
+                if (!res.ok) throw new Error();
                 const data = await res.json();
                 const pool = isNight ? data.night : data.morning;
                 const msg = pool[Math.floor(Math.random() * pool.length)];
                 display.innerText = msg;
                 speak(msg);
-            } catch (e) { display.innerText = "清欢未到，且饮杯茶。"; }
+            } catch (e) { 
+                display.innerText = "清欢未到，且饮杯茶。（请检查 quotes.json 是否在根目录）"; 
+            }
         }
 
         async function openBox() {
             const display = document.getElementById('quoteText');
+            display.innerText = "正在感应盲盒...";
             try {
                 const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/issues?state=all`, {
                     headers: { Authorization: `token ${GITHUB_TOKEN}` }
@@ -66,13 +80,36 @@
                     const msg = data[Math.floor(Math.random() * data.length)].title;
                     display.innerText = "【盲盒感应】\n" + msg;
                     speak(msg);
+                } else {
+                    display.innerText = "池子空空的，去投递第一份心事吧。";
                 }
-            } catch (e) { display.innerText = "信号丢失..."; }
+            } catch (e) { display.innerText = "感应失败了..."; }
+        }
+
+        function showPost() { document.getElementById('postModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('postModal').style.display = 'none'; }
+        
+        async function submitPost() {
+            const text = document.getElementById('postInput').value.trim();
+            if(!text) return;
+            try {
+                const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/issues`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: text, body: "网页投递" })
+                });
+                if(res.ok) { 
+                    alert("寄出成功！已经自动入池啦。"); 
+                    closeModal(); 
+                    document.getElementById('postInput').value = "";
+                }
+            } catch (e) { alert("信号丢失..."); }
         }
 
         function speak(msg) {
             window.speechSynthesis.cancel();
-            const s = new SpeechSynthesisUtterance(msg.split('】')[1] || msg);
+            const cleanMsg = msg.includes('】') ? msg.split('】')[1] : msg;
+            const s = new SpeechSynthesisUtterance(cleanMsg);
             s.lang = 'zh-CN'; s.rate = 0.85;
             window.speechSynthesis.speak(s);
         }
