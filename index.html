@@ -6,61 +6,55 @@
     <title>知己</title>
     <link rel="apple-touch-icon" href="icon.png">
     <style>
-        :root { --dai-qing: #2b5f58; --txt: #34495e; --bg-mask: rgba(253, 253, 252, 0.96); }
-        body { margin: 0; font-family: "STKaiti", "KaiTi", serif; transition: 1s; overflow: hidden; background: #fdfdfc; }
+        :root { --dai-qing: #2b5f58; --accent: #d4a3a3; --txt: #5d5d5d; }
+        body { margin: 0; font-family: "STKaiti", "KaiTi", serif; overflow: hidden; background: #f9f4f4; transition: 1s; }
         
-        /* 动态书画背景 */
-        #bg-canvas { position: fixed; inset: 0; background-size: cover; background-position: center; filter: blur(4px) opacity(0.5); transition: 2s; z-index: -1; }
-        #bg-mask { position: fixed; inset: 0; background: var(--bg-mask); z-index: -1; }
+        /* 彩色流光背景 */
+        #bg-canvas { position: fixed; inset: 0; background: linear-gradient(135deg, #f9f4f4 0%, #fdeff2 50%, #e0eafc 100%); z-index: -1; transition: 2s; }
+        
+        /* 见字如面开屏 */
+        #loader { position: fixed; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #fff; z-index: 9999; cursor: pointer; transition: 1s; }
+        .circle { width: 60px; height: 60px; border: 1px solid var(--accent); border-radius: 50%; opacity: 0.2; animation: pulse 2s infinite; }
+        
+        .container { height: 100vh; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 0 12%; box-sizing: border-box; }
+        
+        .controls { position: absolute; top: 25px; right: 25px; z-index: 100; opacity: 0.4; display: flex; gap: 15px; }
+        #musicBtn, #tagBtn { cursor: pointer; font-size: 1.1rem; }
 
-        /* 解决白屏：初始层 */
-        #loader { position: fixed; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #fdfdfc; z-index: 1000; transition: 1s; }
-        .circle { width: 45px; height: 45px; border: 1px solid var(--dai-qing); border-radius: 50%; opacity: 0.2; animation: pulse 2.5s infinite; }
+        .content-area { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; text-align: center; }
+        #quoteText { font-size: 1.55rem; line-height: 2.3; color: var(--txt); opacity: 0; transition: 1.5s; white-space: pre-wrap; letter-spacing: 2px; }
         
-        .container { height: 100vh; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 0 10%; box-sizing: border-box; }
-        
-        /* 控制区：静音 & 音乐 */
-        .controls { position: absolute; top: 25px; right: 25px; display: flex; gap: 20px; z-index: 100; opacity: 0.3; }
-        #muteBtn, #musicBtn { cursor: pointer; font-size: 1.1rem; }
+        footer { width: 100%; max-width: 400px; padding-bottom: 60px; display: flex; flex-direction: column; gap: 15px; }
+        .btn { border-radius: 12px; padding: 16px; font-size: 1.05rem; cursor: pointer; transition: 0.3s; letter-spacing: 5px; border: none; font-family: inherit; }
+        .btn-primary { background: var(--accent); color: white; box-shadow: 0 4px 12px rgba(212,163,163,0.3); }
+        .btn-sub { background: rgba(255,255,255,0.8); color: #999; border: 1px solid #eee; }
+        .btn-disabled { background: #f0f0f0 !important; color: #ccc !important; cursor: not-allowed; }
 
-        /* C位美文 */
-        .content-area { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; max-width: 500px; }
-        #quoteText { font-size: 1.35rem; line-height: 2.3; color: var(--txt); opacity: 0; transition: 1.2s; white-space: pre-wrap; text-align: justify; }
-        
-        footer { width: 100%; max-width: 400px; padding-bottom: 50px; display: flex; flex-direction: column; gap: 15px; }
-        .btn { border-radius: 40px; padding: 15px; font-size: 0.95rem; cursor: pointer; transition: 0.3s; letter-spacing: 3px; border: none; }
-        .btn-primary { background: var(--dai-qing); color: white; box-shadow: 0 4px 15px rgba(43,95,88,0.15); }
-        .btn-sub { background: rgba(0,0,0,0.03); color: #999; }
-        .btn-disabled { background: #eee !important; color: #ccc !important; cursor: not-allowed; }
-
-        @keyframes pulse { 0% { transform: scale(0.9); opacity: 0.1; } 50% { opacity: 0.3; } 100% { transform: scale(1.1); opacity: 0.1; } }
-        body.night { --bg-mask: rgba(26, 26, 26, 0.96); --txt: #bdc3c7; }
-        body.night #loader { background: #1a1a1a; }
+        @keyframes pulse { 0% { transform: scale(0.9); opacity: 0.1; } 50% { opacity: 0.4; } 100% { transform: scale(1.1); opacity: 0.1; } }
     </style>
 </head>
 <body>
     <div id="bg-canvas"></div>
-    <div id="bg-mask"></div>
-
     <audio id="bgMusic" loop src="https://api.uomg.com/api/rand.music?sort=%E7%83%AD%E6%AD%8C%E6%A6%9C"></audio>
 
-    <div id="loader">
+    <div id="loader" onclick="startApp()">
         <div class="circle"></div>
-        <p style="margin-top:20px; color:var(--dai-qing); opacity:0.6; letter-spacing:8px; font-size: 1.1rem;">见字如面 讨你欢喜</p>
+        <p style="margin-top:25px; color:var(--accent); letter-spacing:10px; font-size: 1.3rem;">见字如面 讨你欢喜</p>
+        <p style="margin-top:10px; font-size:0.75rem; color:#ccc;">( 轻触开启同频感应 )</p>
     </div>
     
     <div class="controls">
+        <span id="tagBtn" onclick="selectRole()" title="设定身份">🏷️</span>
         <span id="musicBtn" onclick="toggleMusic()">🎵</span>
-        <span id="muteBtn" onclick="toggleMute()">🔊</span>
     </div>
 
     <div class="container">
-        <header style="padding-top:40px; opacity:0.2; letter-spacing:10px; font-size:0.8rem;">知己</header>
+        <header style="padding-top:50px; opacity:0.3; letter-spacing:12px; font-size:0.8rem; color: var(--accent);">知 己</header>
         <main class="content-area"><div id="quoteText"></div></main>
         <footer>
             <button class="btn btn-primary" onclick="fetchQuote()">换一则心情</button>
-            <button id="boxBtn" class="btn btn-sub" onclick="openBox()">感应盲盒 (3/3)</button>
-            <div id="postLink" style="font-size:0.75rem; color:#ccc; cursor:pointer; text-align:center" onclick="showPost()">— 留下此时心情 —</div>
+            <button id="boxBtn" class="btn btn-sub" onclick="openBox()">感应同频盲盒</button>
+            <div id="postLink" style="font-size:0.8rem; color:#bbb; cursor:pointer; text-align:center" onclick="showPost()">— 留下此时心情 —</div>
         </footer>
     </div>
 
@@ -69,112 +63,86 @@
         const GITHUB_TOKEN = _p.join("");
         const USER = "xdbglxf", REPO = "zhiji";
 
-        const bgMap = {
-            'qianshan': ['山', '江', '河', '辽阔', '千里', '青绿'],
-            'qingming': ['粥', '烟火', '市井', '人间', '茶', '饭'],
-            'huaniao': ['花', '鸟', '春', '清幽', '蝶', '香'],
-            'yeyan': ['酒', '饮', '宴', '夜', '月', '醉']
-        };
+        // 默认角色
+        let myRole = localStorage.getItem('myRole') || '未设定';
 
-        let isMuted = localStorage.getItem('muted') === 'true';
-        let musicPlaying = false;
-        const audio = document.getElementById('bgMusic');
-
-        function toggleMusic() {
-            if(!musicPlaying) { audio.play(); musicPlaying = true; document.getElementById('musicBtn').style.opacity = 1; }
-            else { audio.pause(); musicPlaying = false; document.getElementById('musicBtn').style.opacity = 0.3; }
+        function selectRole() {
+            const roles = ['打工人', '家庭主妇', '学生', '自由灵魂'];
+            const r = prompt("你是谁？(输入：打工人 / 家庭主妇 / 学生 / 自由灵魂)", myRole);
+            if(roles.includes(r)) {
+                myRole = r;
+                localStorage.setItem('myRole', r);
+                alert(`感应已锁定：${r}`);
+                updateTheme();
+            }
         }
 
-        function toggleMute() {
-            isMuted = !isMuted; localStorage.setItem('muted', isMuted);
-            document.getElementById('muteBtn').innerText = isMuted ? '🔇' : '🔊';
-            window.speechSynthesis.cancel();
+        function updateTheme() {
+            const bg = document.getElementById('bg-canvas');
+            if(myRole === '打工人') bg.style.background = "linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%)";
+            else if(myRole === '家庭主妇') bg.style.background = "linear-gradient(135deg, #fdeff2 0%, #feb47b 100%)";
+            else bg.style.background = "linear-gradient(135deg, #f9f4f4 0%, #fdeff2 50%, #e0eafc 100%)";
         }
 
-        function getTodayKey() { return new Date().toDateString(); }
-        function getCount(t) { return (JSON.parse(localStorage.getItem(t) || '{}').date === getTodayKey()) ? JSON.parse(localStorage.getItem(t)).count : 0; }
-        function addCount(t) { localStorage.setItem(t, JSON.stringify({date:getTodayKey(), count:getCount(t)+1})); updateButtons(); }
-
-        function updateButtons() {
-            const bc = getCount('box'), pc = getCount('post');
-            const bBtn = document.getElementById('boxBtn'), pLnk = document.getElementById('postLink');
-            if(bc>=3){ bBtn.innerText="今日感应已满"; bBtn.className="btn btn-disabled"; bBtn.onclick=null; }
-            else { bBtn.innerText=`感应盲盒 (${3-bc}/3)`; }
-            if(pc>=3){ pLnk.innerText="— 今日投递已满 —"; pLnk.onclick=null; }
-            else { pLnk.innerText=`— 留下此时心情 (${3-pc}/3) —`; }
+        function startApp() {
+            document.getElementById('loader').style.opacity = 0;
+            document.getElementById('bgMusic').play().catch(() => {});
+            setTimeout(() => document.getElementById('loader').style.display = 'none', 1000);
+            if(myRole === '未设定') {
+                setTimeout(selectRole, 500);
+            }
+            fetchQuote();
         }
 
         async function fetchQuote() {
             const display = document.getElementById('quoteText');
             display.style.opacity = 0;
-            const hour = new Date().getHours();
-            document.body.className = (hour<6 || hour>=18) ? 'night' : '';
-
             try {
                 const res = await fetch(`./quotes.json?v=${Date.now()}`);
                 const data = await res.json();
-                const pool = (hour<6 || hour>=18) ? data.night : data.morning;
-                const msg = pool[Math.floor(Math.random()*pool.length)];
-                
-                setTimeout(() => {
-                    display.innerText = msg;
-                    let type = 'general';
-                    for(let k in bgMap) { if(bgMap[k].some(w=>msg.includes(w))) { type=k; break; } }
-                    document.getElementById('bg-canvas').style.backgroundImage = `url('bg_${type}.jpg')`;
-                    display.style.opacity = 1;
-                    document.getElementById('loader').style.opacity = 0;
-                    setTimeout(()=>document.getElementById('loader').style.display='none', 1000);
-                    if(!isMuted) speak(msg);
-                }, 600);
+                const pool = (new Date().getHours()<6 || new Date().getHours()>=18) ? data.night : data.morning;
+                display.innerText = pool[Math.floor(Math.random()*pool.length)];
+                display.style.opacity = 1;
             } catch (e) {
                 display.innerText = "见字如面，讨你欢喜。";
                 display.style.opacity = 1;
-                document.getElementById('loader').style.display='none';
             }
         }
 
         async function openBox() {
-            if(getCount('box')>=3) return;
             const display = document.getElementById('quoteText');
             display.style.opacity = 0;
             try {
-                const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/issues?state=all&sort=updated`, {
+                const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/issues?state=all&v=${Date.now()}`, {
                     headers: { Authorization: `token ${GITHUB_TOKEN}` }
                 });
                 const data = await res.json();
-                if(data.length>0){
-                    const msg = data[Math.floor(Math.random()*data.length)].title;
-                    display.innerText = "【盲盒感应】\n" + msg;
-                    display.style.opacity = 1;
-                    if(!isMuted) speak(msg);
-                    addCount('box');
-                }
-            } catch(e) { display.innerText="信号微弱..."; display.style.opacity=1; }
+                // 核心逻辑：过滤同频内容
+                let matches = data.filter(i => i.body.includes(myRole));
+                let target = matches.length > 0 ? matches : data; // 找不到同频就随机
+                
+                const item = target[Math.floor(Math.random()*target.length)];
+                display.innerText = `【${myRole}的共鸣】\n` + item.title;
+                display.style.opacity = 1;
+            } catch(e) { display.innerText="正在感应星辰..."; display.style.opacity=1; }
         }
 
         function showPost() {
-            if(getCount('post')>=3) return;
-            const msg = prompt("留下你此时的心情：");
-            if(msg) submitPost(msg);
-        }
-
-        async function submitPost(t) {
-            try {
-                await fetch(`https://api.github.com/repos/${USER}/${REPO}/issues`, {
+            const msg = prompt(`[${myRole}] 留下你此时的心情：`);
+            if(msg) {
+                fetch(`https://api.github.com/repos/${USER}/${REPO}/issues`, {
                     method:'POST', headers:{'Authorization':`token ${GITHUB_TOKEN}`,'Content-Type':'application/json'},
-                    body:JSON.stringify({title:t, body:"网页投递"})
-                });
-                alert("已寄出。"); addCount('post');
-            } catch(e) { alert("寄往云端失败..."); }
+                    body:JSON.stringify({title:msg, body: `身份:${myRole}`})
+                }).then(() => alert("已寄出，寻找同频的人。"));
+            }
         }
 
-        function speak(m) {
-            window.speechSynthesis.cancel();
-            const s = new SpeechSynthesisUtterance(m.includes('】')?m.split('】')[1]:m);
-            s.lang='zh-CN'; s.rate=0.85; window.speechSynthesis.speak(s);
+        function toggleMusic() {
+            const a = document.getElementById('bgMusic');
+            a.paused ? a.play() : a.pause();
         }
 
-        window.onload = () => { updateButtons(); fetchQuote(); };
+        window.onload = updateTheme;
     </script>
 </body>
 </html>
