@@ -5,104 +5,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>知己 | 你的私人角落</title>
     <style>
-        :root { --bg-color: #fce4ec; --accent-color: #f06292; --text-main: #4a4a4a; --text-sub: #880e4f; }
-        body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: var(--bg-color); font-family: "PingFang SC", sans-serif; color: var(--text-main); transition: 0.5s; }
-        .main-card { background: rgba(255, 255, 255, 0.92); padding: 50px 30px; border-radius: 40px; width: 85%; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(240, 98, 146, 0.15); }
-        h1 { font-size: 1.8rem; color: var(--text-sub); margin-bottom: 5px; }
-        .subtitle { font-size: 0.9rem; color: #f48fb1; margin-bottom: 40px; letter-spacing: 2px; }
-        .warm-quote { font-size: 1.2rem; line-height: 1.8; margin: 40px 0; min-height: 100px; display: flex; align-items: center; justify-content: center; }
-        .mode-group { display: flex; justify-content: center; gap: 15px; margin-bottom: 40px; }
-        .mode-btn { border: none; padding: 12px 25px; border-radius: 50px; color: white; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .sun { background: #ffb1b1; }
-        .moon { background: #a29bfe; }
-        .appendix { border-top: 1px solid #fce4ec; padding-top: 25px; display: flex; justify-content: space-around; }
-        .app-link { background: none; border: none; color: #adadad; font-size: 0.85rem; cursor: pointer; text-decoration: underline; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(252, 228, 236, 0.8); backdrop-filter: blur(8px); z-index: 100; justify-content: center; align-items: center; }
-        .modal-box { background: white; padding: 30px; border-radius: 30px; width: 80%; max-width: 320px; }
-        textarea { width: 100%; height: 100px; border: 1px solid #ffebee; border-radius: 15px; padding: 15px; margin: 15px 0; box-sizing: border-box; outline: none; }
+        :root { --day-bg: #f7f8f3; --night-bg: #2c3e50; --day-text: #2f3542; --night-text: #f1f2f6; }
+        body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: "STKaiti", "KaiTi", serif; transition: 1s; overflow: hidden; }
+        .main-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); padding: 40px; border-radius: 20px; width: 85%; max-width: 450px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.3); }
+        h1 { font-size: 1.8rem; letter-spacing: 5px; margin: 0; color: #333; }
+        #tag { font-size: 0.9rem; margin-top: 10px; opacity: 0.7; }
+        .content-area { margin: 30px 0; min-height: 180px; display: flex; align-items: center; justify-content: center; line-height: 2; font-size: 1.15rem; color: #444; text-align: justify; }
+        .btn-group { display: flex; flex-direction: column; gap: 15px; }
+        .action-btn { background: #57606f; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; letter-spacing: 2px; transition: 0.3s; }
+        .action-btn:hover { background: #2f3542; }
+        .footer { margin-top: 25px; font-size: 0.8rem; opacity: 0.5; cursor: pointer; }
     </style>
 </head>
 <body>
     <div class="main-card">
-        <h1>你好，老板 ✨</h1>
-        <div class="subtitle">— 你的私人情绪伴侣 —</div>
-        <div class="warm-quote" id="quoteText">今天辛苦了，<br>记得给自己一个拥抱。</div>
-        <div class="mode-group">
-            <button class="mode-btn sun" onclick="setMode('阳光')">🌞 阳光模式</button>
-            <button class="mode-btn moon" onclick="setMode('治愈')">🌙 治愈模式</button>
+        <h1 id="title">知 己</h1>
+        <div id="tag">寻常日子，清欢随心</div>
+        <div class="content-area" id="quoteText">正在为您折叠时光中的温柔...</div>
+        <div class="btn-group">
+            <button class="action-btn" onclick="fetchQuote()">换一则心情</button>
+            <button class="action-btn" style="background:#a4b0be;" onclick="openBox()">感应盲盒</button>
         </div>
-        <div class="appendix">
-            <button class="app-link" onclick="openBox()">感应盲盒</button>
-            <button class="app-link" onclick="showPost()">投递心事</button>
-        </div>
-    </div>
-
-    <div id="postModal" class="modal" onclick="if(event.target==this)closeModal()">
-        <div class="modal-box">
-            <h3 style="margin:0; color: #f06292;">写给未来的自己</h3>
-            <textarea id="postInput" placeholder="在此刻，留下你的呼吸..."></textarea>
-            <button class="mode-btn sun" style="width:100%" onclick="submitPost()">轻轻寄出</button>
-        </div>
+        <div class="footer" onclick="showPost()">— 投递心事 —</div>
     </div>
 
     <script>
-        const _p1 = "ghp_nofUZ0PMRG6I";
-        const _p2 = "ZS9149gLWiHehb6";
-        const _p3 = "ndt0ZgDmG";
-        const GITHUB_TOKEN = _p1 + _p2 + _p3;
-        const USER = "xdbglxf"; 
-        const REPO = "zhiji"; 
+        const _p = ["ghp_nofUZ0PMRG6I", "ZS9149gLWiHehb6", "ndt0ZgDmG"];
+        const GITHUB_TOKEN = _p.join("");
+        const USER = "xdbglxf", REPO = "zhiji";
 
-        const quotes = {
-            '阳光': ["早安老板，今天也要先爱自己，再爱世界。☀️", "生活不在别处，脚下即是坦途。", "在这个吵闹的世界，守住你内心的那份安静。", "外界的声音只是参考，你不快乐才是参考答案。"],
-            '治愈': ["辛苦了老板，如果累了，这扇门永远为你留着。🕯️", "没关系的，允许自己偶尔不那么强大。", "别怕，你是被这个世界偷偷爱着的。", "睡个好觉，梦里有揉碎的星光和橘子味的晚霞。"]
-        };
+        async function fetchQuote() {
+            const display = document.getElementById('quoteText');
+            const hour = new Date().getHours();
+            const isNight = hour < 6 || hour >= 18;
+            
+            // 切换主题
+            document.body.style.background = isNight ? "var(--night-bg)" : "var(--day-bg)";
+            document.querySelector('.main-card').style.background = isNight ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.85)";
+            display.style.color = isNight ? "var(--night-text)" : "var(--day-text)";
+            document.getElementById('title').style.color = isNight ? "#fff" : "#333";
 
-        function setMode(type) {
-            const list = quotes[type];
-            const random = list[Math.floor(Math.random() * list.length)];
-            document.getElementById('quoteText').innerHTML = random;
-            document.body.style.background = type === '阳光' ? '#fff9db' : '#fce4ec';
-            speak(random);
+            try {
+                const res = await fetch(`https://raw.githubusercontent.com/${USER}/${REPO}/main/quotes.json?v=${Date.now()}`);
+                const data = await res.json();
+                const pool = isNight ? data.night : data.morning;
+                const msg = pool[Math.floor(Math.random() * pool.length)];
+                display.innerText = msg;
+                speak(msg);
+            } catch (e) { display.innerText = "清欢未到，且饮杯茶。"; }
         }
 
         async function openBox() {
             const display = document.getElementById('quoteText');
-            display.innerText = "正在感应云端...";
             try {
-                const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/issues?state=closed`, {
+                const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/issues?state=all`, {
                     headers: { Authorization: `token ${GITHUB_TOKEN}` }
                 });
                 const data = await res.json();
-                if (data && data.length > 0) {
+                if(data.length > 0) {
                     const msg = data[Math.floor(Math.random() * data.length)].title;
-                    display.innerText = msg;
+                    display.innerText = "【盲盒感应】\n" + msg;
                     speak(msg);
-                } else { display.innerText = "池子空空的，去GitHub点Close审核一条吧。"; }
-            } catch (e) { display.innerText = "感应失败了..."; }
-        }
-
-        function showPost() { document.getElementById('postModal').style.display = 'flex'; }
-        function closeModal() { document.getElementById('postModal').style.display = 'none'; }
-        
-        async function submitPost() {
-            const text = document.getElementById('postInput').value.trim();
-            if(!text) return;
-            try {
-                const res = await fetch(`https://api.github.com/repos/${USER}/${REPO}/issues`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ title: text, body: "网页投递" })
-                });
-                if(res.ok) { alert("寄出成功！去GitHub Issues点Close审核吧。"); closeModal(); }
-            } catch (e) { alert("信号丢失..."); }
+                }
+            } catch (e) { display.innerText = "信号丢失..."; }
         }
 
         function speak(msg) {
-            const s = new SpeechSynthesisUtterance(msg.replace(/<br>/g, ''));
-            s.lang = 'zh-CN'; s.rate = 0.8;
+            window.speechSynthesis.cancel();
+            const s = new SpeechSynthesisUtterance(msg.split('】')[1] || msg);
+            s.lang = 'zh-CN'; s.rate = 0.85;
             window.speechSynthesis.speak(s);
         }
+
+        fetchQuote();
     </script>
 </body>
 </html>
